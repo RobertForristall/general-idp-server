@@ -22,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -43,6 +44,7 @@ import com.sourceware.labs.idp.repo.UserRepo;
 import com.sourceware.labs.idp.service.AuthService;
 import com.sourceware.labs.idp.service.AwsEmailService;
 import com.sourceware.labs.idp.util.LoginData;
+import com.sourceware.labs.idp.util.RecoveryDataQuestions;
 import com.sourceware.labs.idp.util.RestError;
 import com.sourceware.labs.idp.util.RestError.RestErrorBuilder;
 import com.sourceware.labs.idp.util.SessionCookie;
@@ -86,10 +88,9 @@ import jakarta.validation.ConstraintViolationException;
  */
 @RestController
 @RequestMapping(path = "/user")
-public class UserController {
+public class UserController extends BaseController{
 
   private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
-  private static final String BASE_PATH = "/user";
   private static final String SIGNUP_PATH = "/signup";
   private static final String VERIFY_PATH = "/verify/{userId}/{verificationToken}";
   private static final String LOGIN_PATH = "/login";
@@ -116,6 +117,7 @@ public class UserController {
     this.accountVerificationRepo = accountVerificationRepo;
     this.awsEmailService = awsEmailService;
     this.authService = authService;
+    this.BASE_PATH = "/user";
   }
 
   @ApiResponses({
@@ -308,10 +310,6 @@ public class UserController {
     user.setAccountVerification(
             new AccountVerification(null, signupData.getVerificationToken(), user));
     return user;
-  }
-
-  private String getRoutePath(String path) {
-    return BASE_PATH + "/" + path.split("/")[1];
   }
 
 }
