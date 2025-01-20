@@ -91,6 +91,36 @@ public class JwtManager {
     signedJWT.sign(signer);
     return signedJWT;
   }
+  
+  public static SignedJWT getSignedJwtToken(
+          JWSAlgorithm securityAlg,
+          String clientId,
+          String audience,
+          long tokenExpiration,
+          IdpKeyStoreData keyStoreData,
+          Long userId) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, UnrecoverableEntryException, IOException, OperatorCreationException, JOSEException {
+    JWK key = IdpKeyStoreAccessor.accessKeyStore(securityAlg, keyStoreData);
+    Date now = new Date();
+    JWSHeader header = new JWSHeader.Builder((JWSAlgorithm) key.getAlgorithm())
+            .keyID(key.getKeyID())
+            .type(JOSEObjectType.JWT)
+            .build();
+    JWTClaimsSet jwt = new JWTClaimsSet.Builder().issuer(clientId)
+            .subject(clientId)
+            .audience(audience)
+            .claim("kid", key.getKeyID())
+            .notBeforeTime(Date.from(now.toInstant().minusSeconds(5)))
+            .expirationTime(Date.from(now.toInstant().plusSeconds((tokenExpiration))))
+            .jwtID(UUID.randomUUID().toString())
+            .claim("userId", userId)
+            .build();
+    SignedJWT signedJWT = new SignedJWT(header, jwt);
+    JWSSigner signer = securityAlg.equals(JWSAlgorithm.RS384)
+            ? new RSASSASigner(key.toRSAKey().toRSAPrivateKey())
+            : new ECDSASigner(key.toECKey().toECPrivateKey());
+    signedJWT.sign(signer);
+    return signedJWT;
+  }
 
   /**
    * Function for verifying a Signed JWT
