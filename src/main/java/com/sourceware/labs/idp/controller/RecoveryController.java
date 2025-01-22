@@ -1,6 +1,7 @@
 package com.sourceware.labs.idp.controller;
 
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyStoreException;
@@ -16,13 +17,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import com.nimbusds.jose.JOSEException;
 import com.sourceware.labs.idp.entity.SecurityQuestion;
@@ -37,6 +42,7 @@ import com.sourceware.labs.idp.util.RestError;
 import com.sourceware.labs.idp.util.RestError.RestErrorBuilder;
 
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
@@ -64,41 +70,58 @@ public class RecoveryController extends BaseController {
     this.authService = authService;
     this.BASE_PATH = "/recovery";
   }
-  
+
   @GetMapping(RECOVERY_PATH_SQ)
-  String getRecoveryQuestions(@RequestParam(name="email", required=true) String email, HttpServletResponse response) throws IOException {
-    if (email == null || email.isBlank()) {
-      response.sendError(HttpStatus.BAD_REQUEST.value(), new RestErrorBuilder().setRoute(getRoutePath(RECOVERY_PATH_SQ)).setMethod(RequestMethod.GET).setErrorCode(1).setMsg("Error: An email must be provided").build().toString());
+  String getRecoveryQuestions(
+          @RequestParam(name = "email", required = true) String email,
+          HttpServletResponse response) throws IOException {
+    email = URLDecoder.decode(email, StandardCharsets.UTF_8);
+    if (!EmailValidator.getInstance().isValid(email)) {
+      response.sendError(
+              HttpStatus.BAD_REQUEST.value(),
+              new RestErrorBuilder().setRoute(getRoutePath(RECOVERY_PATH_SQ))
+                      .setMethod(RequestMethod.GET)
+                      .setErrorCode(2)
+                      .setMsg("Error: The provided email is not valid")
+                      .build()
+                      .toString());
     } else {
-      if (!EmailValidator.getInstance().isValid(email)) {
-        response.sendError(HttpStatus.BAD_REQUEST.value(), new RestErrorBuilder().setRoute(getRoutePath(RECOVERY_PATH_SQ)).setMethod(RequestMethod.GET).setErrorCode(2).setMsg("Error: The provided email is not valid").build().toString());
+      List<User> users = userRepo.findUserByEmail(email);
+      if (users.size() != 1) {
+        response.sendError(
+                HttpStatus.NOT_FOUND.value(),
+                new RestErrorBuilder().setRoute(getRoutePath(RECOVERY_PATH_SQ))
+                        .setMethod(RequestMethod.GET)
+                        .setErrorCode(3)
+                        .setMsg("Error: No user found using provided email")
+                        .build()
+                        .toString());
+      } else if (!users.get(0).isVerified()) {
+        response.sendError(
+                HttpStatus.UNAUTHORIZED.value(),
+                new RestErrorBuilder().setRoute(getRoutePath(RECOVERY_PATH_SQ))
+                        .setMethod(RequestMethod.GET)
+                        .setErrorCode(4)
+                        .setMsg("Error: User is not verified")
+                        .build()
+                        .toString());
       } else {
-        List<User> users = userRepo.findUserByEmail(email);
-        if (users.size() != 1) {
+        List<SecurityQuestion> questions = securityQuestionRepo
+                .findSecurityQuestionByUser(users.get(0));
+        if (questions.size() != 1) {
           response.sendError(
                   HttpStatus.NOT_FOUND.value(),
                   new RestErrorBuilder().setRoute(getRoutePath(RECOVERY_PATH_SQ))
-                          .setMethod(RequestMethod.POST)
-                          .setErrorCode(3)
-                          .setMsg("Error: No user found using provided email")
+                          .setMethod(RequestMethod.GET)
+                          .setErrorCode(5)
+                          .setMsg("Error: User did not provide security questions")
                           .build()
                           .toString());
         } else {
-          List<SecurityQuestion> questions = securityQuestionRepo
-                  .findSecurityQuestionByUser(users.get(0));
-          if (questions.size() != 1) {
-            response.sendError(
-                    HttpStatus.NOT_FOUND.value(),
-                    new RestErrorBuilder().setRoute(getRoutePath(RECOVERY_PATH_SQ))
-                            .setMethod(RequestMethod.POST)
-                            .setErrorCode(4)
-                            .setMsg("Error: User did not provide security questions")
-                            .build()
-                            .toString());
-          } else {
-            response.setStatus(HttpStatus.OK.value());
-            return new GetSecurityQuestions(questions.get(0).getQuestion1(), questions.get(0).getQuestion2()).toString();
-          }
+          response.setStatus(HttpStatus.OK.value());
+          return new GetSecurityQuestions(
+                  questions.get(0).getQuestion1(),
+                  questions.get(0).getQuestion2()).toString();
         }
       }
     }
@@ -124,6 +147,15 @@ public class RecoveryController extends BaseController {
                         .setMsg("Error: No user found using provided email")
                         .build()
                         .toString());
+      } else if (!users.get(0).isVerified()) {
+        response.sendError(
+                HttpStatus.NOT_FOUND.value(),
+                new RestErrorBuilder().setRoute(getRoutePath(RECOVERY_PATH_SQ))
+                        .setMethod(RequestMethod.POST)
+                        .setErrorCode(5)
+                        .setMsg("Error: User is not verified")
+                        .build()
+                        .toString());
       } else {
         List<SecurityQuestion> questions = securityQuestionRepo
                 .findSecurityQuestionByUser(users.get(0));
@@ -132,7 +164,7 @@ public class RecoveryController extends BaseController {
                   HttpStatus.NOT_FOUND.value(),
                   new RestErrorBuilder().setRoute(getRoutePath(RECOVERY_PATH_SQ))
                           .setMethod(RequestMethod.POST)
-                          .setErrorCode(5)
+                          .setErrorCode(6)
                           .setMsg("Error: User did not provide security questions")
                           .build()
                           .toString());
@@ -151,7 +183,7 @@ public class RecoveryController extends BaseController {
                     HttpStatus.UNAUTHORIZED.value(),
                     new RestErrorBuilder().setRoute(getRoutePath(RECOVERY_PATH_SQ))
                             .setMethod(RequestMethod.POST)
-                            .setErrorCode(6)
+                            .setErrorCode(7)
                             .setMsg("Error: Answers do not match")
                             .build()
                             .toString());
@@ -160,5 +192,21 @@ public class RecoveryController extends BaseController {
       }
     }
     return null;
+  }
+
+  @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(MissingServletRequestParameterException.class)
+  public String handleError(HttpServletRequest req, MissingServletRequestParameterException ex) {
+    if (req.getRequestURI().contains("questions")) {
+      RestError restError = new RestErrorBuilder().setRoute(getRoutePath(RECOVERY_PATH_SQ))
+              .setMethod(RequestMethod.GET)
+              .setErrorCode(1)
+              .setMsg("Error: The 'email' request parameter must be defined")
+              .build();
+      LOGGER.error(restError.toString());
+      return restError.toString();
+    }
+    LOGGER.error(ex.getLocalizedMessage());
+    return ex.getLocalizedMessage();
   }
 }
