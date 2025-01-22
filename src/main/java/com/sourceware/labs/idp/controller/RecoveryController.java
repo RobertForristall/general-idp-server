@@ -149,7 +149,7 @@ public class RecoveryController extends BaseController {
                         .toString());
       } else if (!users.get(0).isVerified()) {
         response.sendError(
-                HttpStatus.NOT_FOUND.value(),
+                HttpStatus.UNAUTHORIZED.value(),
                 new RestErrorBuilder().setRoute(getRoutePath(RECOVERY_PATH_SQ))
                         .setMethod(RequestMethod.POST)
                         .setErrorCode(5)
@@ -178,6 +178,7 @@ public class RecoveryController extends BaseController {
                             "SourcewareLabIdpRecovery",
                             URLEncoder.encode(cookie.toString(), StandardCharsets.UTF_8)));
             response.setStatus(HttpStatus.OK.value());
+            return "Recovery Cookie Obtained!";
           } else {
             response.sendError(
                     HttpStatus.UNAUTHORIZED.value(),
