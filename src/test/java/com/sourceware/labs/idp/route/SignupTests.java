@@ -378,6 +378,21 @@ public class SignupTests extends BaseIdpApplicationTests {
             4,
             "Error: User's recovery phone number is not valid");
   }
+  
+  @Test
+  public void allowUserToBeCreatedWithoutSecurityQuestions() {
+    SignupData signupData = TestData.getTestSignupData();
+    signupData.setEmail("test3@test.com");
+    signupData.setSa1(null);
+    signupData.setSa2(null);
+    signupData.setSq1(null);
+    signupData.setSq2(null);
+    HttpEntity<SignupData> request = new HttpEntity<>(signupData, new HttpHeaders());
+    ResponseEntity<String> result = this.restTemplate
+            .postForEntity(fullTestingRoute, request, String.class);
+    Assertions.assertEquals(HttpStatusCode.valueOf(201), result.getStatusCode());
+    Assertions.assertEquals("User Created Successfully", result.getBody());
+  }
 
   private ResponseEntity<String> issueRequest(SignupData data) {
     HttpEntity<SignupData> request = new HttpEntity<>(data, new HttpHeaders());

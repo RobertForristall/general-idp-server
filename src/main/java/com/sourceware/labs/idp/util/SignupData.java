@@ -72,6 +72,13 @@ public class SignupData {
     }
     return true;
   }
+  
+  public boolean areSecurityQuestionsPresent() {
+    return (sq1 != null && !sq1.isBlank())
+            || (sq2 != null && !sq2.isBlank())
+            || (sa1 != null && !sa1.isBlank())
+            || (sa2 != null && !sa2.isBlank());
+  }
 
   public Optional<RestError> isDataValid(String route, RequestMethod method) {
     RestErrorBuilder errorBuilder = new RestErrorBuilder().setRoute(route).setMethod(method);

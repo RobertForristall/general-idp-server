@@ -293,16 +293,18 @@ public class UserController extends BaseController{
             signupData.getDob(),
             ts,
             ts);
-    SecurityQuestion sq = new SecurityQuestion(
-            null,
-            signupData.getSq1(),
-            signupData.getSq2(),
-            signupData.getSa1(),
-            signupData.getSa2(),
-            ts,
-            ts,
-            null);
-    user.setSecurityQuestion(sq);
+    if (signupData.areSecurityQuestionsPresent()) {
+      SecurityQuestion sq = new SecurityQuestion(
+              null,
+              signupData.getSq1(),
+              signupData.getSq2(),
+              signupData.getSa1(),
+              signupData.getSa2(),
+              ts,
+              ts,
+              null);
+      user.setSecurityQuestion(sq);
+    }
     user.setRoles(
             Set.of(
                     roleRepo.findRoleByApplicationAndRole(Application.RealQuick, RoleName.User)
