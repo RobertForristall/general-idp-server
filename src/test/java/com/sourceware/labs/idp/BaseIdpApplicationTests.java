@@ -1,5 +1,8 @@
 package com.sourceware.labs.idp;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 import org.junit.jupiter.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -106,6 +109,10 @@ public abstract class BaseIdpApplicationTests {
     return "/%s/%s".formatted(
             userId != null ? userId : "",
             verificationToken != null ? verificationToken : "");
+  }
+  
+  protected String getSecurityQuestionsParams(String email) {
+    return "?email=" + URLEncoder.encode(email, StandardCharsets.UTF_8);
   }
 
 }
