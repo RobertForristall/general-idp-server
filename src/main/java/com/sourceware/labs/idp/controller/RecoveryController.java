@@ -20,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,8 +31,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import com.nimbusds.jose.JOSEException;
+import com.sourceware.labs.idp.entity.RecoveryCode.RecoveryType;
+import com.sourceware.labs.idp.entity.RecoveryVerification;
 import com.sourceware.labs.idp.entity.SecurityQuestion;
 import com.sourceware.labs.idp.entity.User;
+import com.sourceware.labs.idp.repo.RecoveryVerificationRepo;
 import com.sourceware.labs.idp.repo.SecurityQuestionRepo;
 import com.sourceware.labs.idp.repo.UserRepo;
 import com.sourceware.labs.idp.service.AuthService;
@@ -50,6 +54,7 @@ import jakarta.servlet.http.HttpServletResponse;
 public class RecoveryController extends BaseController {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(RecoveryController.class);
+  private static final String RECOVERY_PATH_VERIFY_RESOURCE = "/verify/{userId}/{recoveryType}/{verificationToken}";
   private static final String RECOVERY_PATH_SQ = "/questions";
   private static final String RECOVERY_PATH_EMAIL = "/email";
   private static final String RECOVERY_PATH_EMAIL_VERIFY = "/email/verify";
@@ -57,6 +62,8 @@ public class RecoveryController extends BaseController {
   private final UserRepo userRepo;
 
   private final SecurityQuestionRepo securityQuestionRepo;
+  
+  private final RecoveryVerificationRepo recoveryVerificationRepo;
 
   private final AuthService authService;
 
@@ -64,11 +71,46 @@ public class RecoveryController extends BaseController {
   RecoveryController(
           UserRepo userRepo,
           SecurityQuestionRepo securityQuestionRepo,
+          RecoveryVerificationRepo recoveryVerificationRepo,
           AuthService authService) {
     this.userRepo = userRepo;
     this.securityQuestionRepo = securityQuestionRepo;
+    this.recoveryVerificationRepo = recoveryVerificationRepo;
     this.authService = authService;
     this.BASE_PATH = "/recovery";
+  }
+  
+  @GetMapping(RECOVERY_PATH_VERIFY_RESOURCE)
+  String verifyRecoveryResource(
+          @PathVariable Long userId,
+          @PathVariable String recoveryType,
+          @PathVariable String verificationToken,
+          HttpServletResponse response) throws IOException {
+    List<RecoveryVerification> verifications = recoveryVerificationRepo
+            .findRecoveryVerificationByUserIdAndRecoveryTypeAndVerificationToken(
+                    userId,
+                    recoveryType,
+                    verificationToken);
+    if (verifications.size() == 1) {
+      User user = userRepo.getReferenceById(userId);
+      if (recoveryType.equals(RecoveryType.EMAIL.name())) {
+        user.getRecoveryEmail().setVerified(true);
+      } else {
+        user.getRecoveryPhone().setVerified(true);
+      }
+      user = userRepo.save(user);
+      response.setStatus(HttpStatus.OK.value());
+      return "User's recovery " + recoveryType + " successfully verified";
+    } else {
+      RestError restError = new RestErrorBuilder().setRoute(getRoutePath(RECOVERY_PATH_VERIFY_RESOURCE))
+              .setMethod(RequestMethod.GET)
+              .setErrorCode(4)
+              .setMsg("Error: no entry in recovery validation table found")
+              .build();
+      LOGGER.error(restError.toString());
+      response.sendError(HttpStatus.BAD_REQUEST.value(), restError.toString());
+    }
+    return null;
   }
 
   @GetMapping(RECOVERY_PATH_SQ)
@@ -193,6 +235,27 @@ public class RecoveryController extends BaseController {
       }
     }
     return null;
+  }
+  
+  @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+  public String handleError(HttpServletRequest req, MethodArgumentTypeMismatchException ex) {
+    if (req.getRequestURI().contains("verify")) {
+      RestErrorBuilder builder = new RestErrorBuilder().setRoute(getRoutePath(RECOVERY_PATH_VERIFY_RESOURCE))
+              .setMethod(RequestMethod.GET);
+      if (ex.getLocalizedMessage().contains("userId")) {
+        builder.setErrorCode(1).setMsg("Error: user ID is not of type Integer");
+      } else if (ex.getLocalizedMessage().contains("recoveryType")) {
+        builder.setErrorCode(2).setMsg("Error: recovery type is not of type String");
+      } else {
+        builder.setErrorCode(3).setMsg("Error: verification token is not of type String");
+      }
+      RestError restError = builder.build();
+      LOGGER.error(restError.toString());
+      return restError.toString();
+    }
+    LOGGER.error(ex.getLocalizedMessage());
+    return ex.getLocalizedMessage();
   }
 
   @ResponseStatus(value = HttpStatus.BAD_REQUEST)
