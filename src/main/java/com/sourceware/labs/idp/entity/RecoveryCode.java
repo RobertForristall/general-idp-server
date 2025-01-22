@@ -19,7 +19,21 @@ import jakarta.validation.constraints.NotNull;
 public class RecoveryCode {
 
   public enum RecoveryType {
-    EMAIL, PHONE
+    EMAIL("email"), PHONE("phone");
+    
+    private final String name;
+
+    private RecoveryType(String s) {
+      name = s;
+    }
+
+    public boolean equalsName(String otherName) {
+      return name.equals(otherName);
+    }
+
+    public String toString() {
+      return name;
+    }
   }
 
   // Internal database ID for the user

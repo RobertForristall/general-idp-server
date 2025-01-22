@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +34,8 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 import com.nimbusds.jose.JOSEException;
 import com.sourceware.labs.idp.entity.AccountVerification;
+import com.sourceware.labs.idp.entity.RecoveryCode.RecoveryType;
+import com.sourceware.labs.idp.entity.RecoveryVerification;
 import com.sourceware.labs.idp.entity.Role.Application;
 import com.sourceware.labs.idp.entity.Role.RoleName;
 import com.sourceware.labs.idp.entity.SecurityQuestion;
@@ -207,6 +210,23 @@ public class UserController extends BaseController{
     if (verifications.size() == 1) {
       User user = userRepo.getReferenceById(userId);
       user.setVerified(true);
+      if (user.getRecoveryEmail() != null) {
+        RecoveryVerification newRecoveryVerification = new RecoveryVerification();
+        newRecoveryVerification.setRecoveryType(RecoveryType.EMAIL);
+        newRecoveryVerification.setVerificationToken(RandomStringUtils.secureStrong().nextAlphanumeric(50));
+        newRecoveryVerification.setUser(user);
+        Set<RecoveryVerification> recoveryVerifications = user.getRecoveryVerifications();
+        recoveryVerifications.add(newRecoveryVerification);
+        user.setRecoveryVerifications(recoveryVerifications);
+        awsEmailService.sendMessage(
+                awsEmailService.createSimpleMailMessage(
+                        user.getRecoveryEmail().getEmail(),
+                        "Sourceware Labs IDP Recovery Email Verification",
+                        awsEmailService.createRecoveryVerificatioEmailBody(
+                                user.getId(),
+                                newRecoveryVerification.getVerificationToken(),
+                                RecoveryType.EMAIL)));
+      }
       user = userRepo.save(user);
       response.setStatus(HttpStatus.OK.value());
       return "User successfully verified";

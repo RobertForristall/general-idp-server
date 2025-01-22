@@ -8,6 +8,8 @@ import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Service;
 
+import com.sourceware.labs.idp.entity.RecoveryCode.RecoveryType;
+
 /**
  * Spring service class for sending mail using AWS Simple Email Service (SES)
  *
@@ -60,6 +62,15 @@ public class AwsEmailService {
     b.append(
             "<p>Click the following link to verify your account: http://localhost:8080/user/verify?userId="
                     + userId + "&verificationToken=" + verificationToken + "</p>\n");
+    return b.toString();
+  }
+  
+  public String createRecoveryVerificatioEmailBody(Long userId, String verificationToken, RecoveryType recoveryType) {
+    StringBuilder b = new StringBuilder();
+    b.append("<h1>Sourceware Labs IDP</h1>\n");
+    b.append(
+            "<p>Click the following link to verify your recovery " + recoveryType.name()+ ": http://localhost:8080/recovery/verify?userId="
+                    + userId + "&verificationToken=" + verificationToken + "&recoveryType=" + recoveryType.name() +"</p>\n");
     return b.toString();
   }
 
