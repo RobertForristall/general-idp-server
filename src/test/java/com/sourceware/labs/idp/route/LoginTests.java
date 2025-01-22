@@ -189,7 +189,6 @@ public class LoginTests extends BaseIdpApplicationTests{
   }
   
   private boolean validateCookie(String cookie) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, UnrecoverableEntryException, OperatorCreationException, ParseException, IOException, JOSEException {
-    //TODO Implement me!!!
     String decodedCookie = URLDecoder.decode(cookie, StandardCharsets.UTF_8);
     String cookieId = decodedCookie.split("=")[0];
     SessionCookie sessionCookie = new Gson().fromJson(decodedCookie.split("=")[1], SessionCookie.class);
