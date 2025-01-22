@@ -210,11 +210,5 @@ public class LoginTests extends BaseIdpApplicationTests{
     Assertions.assertEquals("User", claimSet.getStringClaim("roleName"));
     Assertions.assertIterableEquals(List.of(), List.of(new Gson().fromJson(claimSet.getStringClaim("additionalPermissions"), String[].class)));
   }
-  
-  private String getVerificationPathVariables(String userId, String verificationToken) {
-    return "/%s/%s".formatted(
-            userId != null ? userId : "",
-            verificationToken != null ? verificationToken : "");
-  }
 
 }

@@ -101,5 +101,11 @@ public abstract class BaseIdpApplicationTests {
             .setMsg(msg)
             .build();
   }
+  
+  protected String getVerificationPathVariables(String userId, String verificationToken) {
+    return "/%s/%s".formatted(
+            userId != null ? userId : "",
+            verificationToken != null ? verificationToken : "");
+  }
 
 }
