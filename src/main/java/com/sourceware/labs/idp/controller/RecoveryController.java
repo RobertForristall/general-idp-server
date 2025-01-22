@@ -37,7 +37,7 @@ import com.sourceware.labs.idp.repo.UserRepo;
 import com.sourceware.labs.idp.service.AuthService;
 import com.sourceware.labs.idp.util.GetSecurityQuestions;
 import com.sourceware.labs.idp.util.RecoveryCookie;
-import com.sourceware.labs.idp.util.RecoveryDataQuestions;
+import com.sourceware.labs.idp.util.RecoveryDataAnswers;
 import com.sourceware.labs.idp.util.RestError;
 import com.sourceware.labs.idp.util.RestError.RestErrorBuilder;
 
@@ -130,7 +130,7 @@ public class RecoveryController extends BaseController {
 
   @PostMapping(RECOVERY_PATH_SQ)
   String recoveryUsingQuestions(
-          @RequestBody RecoveryDataQuestions recoveryDataQuestions,
+          @RequestBody RecoveryDataAnswers recoveryDataQuestions,
           HttpServletResponse response) throws IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException, UnrecoverableEntryException, OperatorCreationException, JOSEException {
     Optional<RestError> error = recoveryDataQuestions
             .isDataValid(getRoutePath(RECOVERY_PATH_SQ), RequestMethod.POST);

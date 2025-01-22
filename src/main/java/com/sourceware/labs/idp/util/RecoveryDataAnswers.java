@@ -9,12 +9,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import com.google.gson.Gson;
 import com.sourceware.labs.idp.util.RestError.RestErrorBuilder;
 
-public class RecoveryDataQuestions {
+public class RecoveryDataAnswers {
   private String email;
   private String answer1;
   private String answer2;
 
-  public RecoveryDataQuestions(String email, String answer1, String answer2) {
+  public RecoveryDataAnswers(String email, String answer1, String answer2) {
     super();
     this.email = email;
     this.answer1 = answer1;
@@ -33,6 +33,18 @@ public class RecoveryDataQuestions {
     return answer2;
   }
   
+  public void setEmail(String email) {
+    this.email = email;
+  }
+
+  public void setAnswer1(String answer1) {
+    this.answer1 = answer1;
+  }
+
+  public void setAnswer2(String answer2) {
+    this.answer2 = answer2;
+  }
+
   private boolean isEmailValid() {
     return EmailValidator.getInstance().isValid(email);
   }
@@ -62,7 +74,7 @@ public class RecoveryDataQuestions {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    RecoveryDataQuestions other = (RecoveryDataQuestions) obj;
+    RecoveryDataAnswers other = (RecoveryDataAnswers) obj;
     return Objects.equals(answer1, other.answer1) && Objects.equals(answer2, other.answer2)
             && Objects.equals(email, other.email);
   }
