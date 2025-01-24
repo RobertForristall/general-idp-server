@@ -59,6 +59,13 @@ public class TestData {
     return user;
   }
   
+  public static SignupData getTestSignupDataWithRecoveryResources() {
+    SignupData data = getTestSignupData();
+    data.setRecoveryEmail("recovery@test.com");
+    data.setRecoveryPhone("+1 (111) 111-1111");
+    return data;
+  }
+  
   public static LoginData getLoginData() {
     LoginData login = new LoginData();
     login.setEmail(email);
