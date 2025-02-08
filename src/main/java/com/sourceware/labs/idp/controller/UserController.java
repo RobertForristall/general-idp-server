@@ -35,6 +35,8 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import com.nimbusds.jose.JOSEException;
 import com.sourceware.labs.idp.entity.AccountVerification;
 import com.sourceware.labs.idp.entity.RecoveryCode.RecoveryType;
+import com.sourceware.labs.idp.entity.RecoveryEmail;
+import com.sourceware.labs.idp.entity.RecoveryPhone;
 import com.sourceware.labs.idp.entity.RecoveryVerification;
 import com.sourceware.labs.idp.entity.Role.Application;
 import com.sourceware.labs.idp.entity.Role.RoleName;
@@ -227,6 +229,16 @@ public class UserController extends BaseController{
                                 newRecoveryVerification.getVerificationToken(),
                                 RecoveryType.EMAIL)));
       }
+      if (user.getRecoveryPhone() != null) {
+        RecoveryVerification newRecoveryVerification = new RecoveryVerification();
+        newRecoveryVerification.setRecoveryType(RecoveryType.PHONE);
+        newRecoveryVerification.setVerificationToken(RandomStringUtils.secureStrong().nextAlphanumeric(50));
+        newRecoveryVerification.setUser(user);
+        Set<RecoveryVerification> recoveryVerifications = user.getRecoveryVerifications();
+        recoveryVerifications.add(newRecoveryVerification);
+        user.setRecoveryVerifications(recoveryVerifications);
+        // TODO send phone SMS with verification token
+      }
       user = userRepo.save(user);
       response.setStatus(HttpStatus.OK.value());
       return "User successfully verified";
@@ -322,6 +334,14 @@ public class UserController extends BaseController{
               ts,
               null);
       user.setSecurityQuestion(sq);
+    }
+    if (signupData.getRecoveryEmail() != null) {
+      RecoveryEmail recoveryEmail = new RecoveryEmail(null, signupData.getRecoveryEmail(), false, ts, ts);
+      user.setRecoveryEmail(recoveryEmail);
+    }
+    if (signupData.getRecoveryPhone() != null) {
+      RecoveryPhone recoveryPhone = new RecoveryPhone(null, signupData.getRecoveryPhone(), false, ts, ts);
+      user.setRecoveryPhone(recoveryPhone);
     }
     user.setRoles(
             Set.of(

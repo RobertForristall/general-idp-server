@@ -17,6 +17,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.google.gson.Gson;
+import com.sourceware.labs.idp.repo.RecoveryVerificationRepo;
 import com.sourceware.labs.idp.repo.UserRepo;
 import com.sourceware.labs.idp.service.AwsEmailService;
 import com.sourceware.labs.idp.util.HttpErrorResponse;
@@ -71,6 +72,9 @@ public abstract class BaseIdpApplicationTests {
 
   @Autowired
   protected UserRepo userRepo;
+  
+  @Autowired
+  protected RecoveryVerificationRepo recoveryVerificationRepo;
 
   @MockitoBean
   protected AwsEmailService awsEmailService;
@@ -104,15 +108,25 @@ public abstract class BaseIdpApplicationTests {
             .setMsg(msg)
             .build();
   }
-  
+
   protected String getVerificationPathVariables(String userId, String verificationToken) {
     return "/%s/%s".formatted(
             userId != null ? userId : "",
             verificationToken != null ? verificationToken : "");
   }
-  
+
   protected String getSecurityQuestionsParams(String email) {
     return "?email=" + URLEncoder.encode(email, StandardCharsets.UTF_8);
+  }
+
+  protected String getRecoveryVerificationPathVariables(
+          String userId,
+          String recoveryType,
+          String token) {
+    return "/%s/%s/%s".formatted(
+            userId != null ? userId : "",
+            recoveryType != null ? recoveryType : "",
+            token != null ? token : "");
   }
 
 }

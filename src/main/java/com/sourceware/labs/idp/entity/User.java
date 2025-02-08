@@ -88,7 +88,7 @@ public class User {
   @JoinColumn(name = "accountVerification", referencedColumnName = "id")
   private AccountVerification accountVerification;
 
-  @OneToMany(mappedBy = "user")
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
   private Set<RecoveryVerification> recoveryVerifications;
 
   @ManyToMany(cascade = CascadeType.ALL)

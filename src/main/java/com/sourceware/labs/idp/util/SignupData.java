@@ -68,7 +68,7 @@ public class SignupData {
               + "|^(\\+\\d{1,3}( )?)?(\\d{3}[ ]?)(\\d{2}[ ]?){2}\\d{2}$";
       Pattern pattern = Pattern.compile(patterns);
       Matcher matcher = pattern.matcher(recoveryPhone);
-      return matcher.hasMatch();
+      return matcher.matches();
     }
     return true;
   }

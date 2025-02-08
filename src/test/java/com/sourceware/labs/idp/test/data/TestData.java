@@ -62,7 +62,7 @@ public class TestData {
   public static SignupData getTestSignupDataWithRecoveryResources() {
     SignupData data = getTestSignupData();
     data.setRecoveryEmail("recovery@test.com");
-    data.setRecoveryPhone("+1 (111) 111-1111");
+    data.setRecoveryPhone("+1 111 111-1111");
     return data;
   }
   

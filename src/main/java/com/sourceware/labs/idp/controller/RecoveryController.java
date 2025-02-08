@@ -89,7 +89,7 @@ public class RecoveryController extends BaseController {
     List<RecoveryVerification> verifications = recoveryVerificationRepo
             .findRecoveryVerificationByUserIdAndRecoveryTypeAndVerificationToken(
                     userId,
-                    recoveryType,
+                    recoveryType.equals("email") ? RecoveryType.EMAIL : RecoveryType.PHONE,
                     verificationToken);
     if (verifications.size() == 1) {
       User user = userRepo.getReferenceById(userId);
