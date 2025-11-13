@@ -97,14 +97,33 @@ public class JwtManagerTests {
             "testRole",
             List.of("perm1", "perm2"));
     Assertions.assertNotNull(jwt.serialize());
-    validateJwtClaimSet(jwt.serialize());
+    validateSessionJwtClaimSet(jwt.serialize());
   }
   
-  public void validateJwtClaimSet(String jwt) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, UnrecoverableEntryException, OperatorCreationException, ParseException, IOException, JOSEException {
+  @Test
+  @Order(3)
+  public void testRecoveryJwt() throws KeyStoreException, NoSuchAlgorithmException, CertificateException, UnrecoverableEntryException, OperatorCreationException, IOException, JOSEException, ParseException {
+    SignedJWT jwt = JwtManager.getSignedJwtToken(
+            JWSAlgorithm.ES256,
+            clientId,
+            audience,
+            tokenExpiration,
+            ecIdpKeyStoreData,
+            Long.valueOf(1));
+    Assertions.assertNotNull(jwt.serialize());
+    validateRecoveryJwtClaimSet(jwt.serialize());
+  }
+  
+  public void validateSessionJwtClaimSet(String jwt) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, UnrecoverableEntryException, OperatorCreationException, ParseException, IOException, JOSEException {
     JWTClaimsSet claimSet = JwtManager.getClaimsSetFromJwt(jwt, JWSAlgorithm.ES256, ecIdpKeyStoreData);
     Assertions.assertEquals(Long.valueOf(1), claimSet.getLongClaim("userId"));
     Assertions.assertEquals("testApplication", claimSet.getStringClaim("application"));
     Assertions.assertEquals("testRole", claimSet.getStringClaim("roleName"));
     Assertions.assertIterableEquals(List.of("perm1", "perm2"), List.of(new Gson().fromJson(claimSet.getStringClaim("additionalPermissions"), String[].class)));
+  }
+  
+  public void validateRecoveryJwtClaimSet(String jwt) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, UnrecoverableEntryException, OperatorCreationException, ParseException, IOException, JOSEException {
+    JWTClaimsSet claimSet = JwtManager.getClaimsSetFromJwt(jwt, JWSAlgorithm.ES256, ecIdpKeyStoreData);
+    Assertions.assertEquals(Long.valueOf(1), claimSet.getLongClaim("userId"));
   }
 }

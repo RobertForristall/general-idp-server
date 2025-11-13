@@ -189,7 +189,6 @@ public class LoginTests extends BaseIdpApplicationTests{
   }
   
   private boolean validateCookie(String cookie) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, UnrecoverableEntryException, OperatorCreationException, ParseException, IOException, JOSEException {
-    //TODO Implement me!!!
     String decodedCookie = URLDecoder.decode(cookie, StandardCharsets.UTF_8);
     String cookieId = decodedCookie.split("=")[0];
     SessionCookie sessionCookie = new Gson().fromJson(decodedCookie.split("=")[1], SessionCookie.class);
@@ -209,12 +208,6 @@ public class LoginTests extends BaseIdpApplicationTests{
     Assertions.assertEquals("RealQuick", claimSet.getStringClaim("application"));
     Assertions.assertEquals("User", claimSet.getStringClaim("roleName"));
     Assertions.assertIterableEquals(List.of(), List.of(new Gson().fromJson(claimSet.getStringClaim("additionalPermissions"), String[].class)));
-  }
-  
-  private String getVerificationPathVariables(String userId, String verificationToken) {
-    return "/%s/%s".formatted(
-            userId != null ? userId : "",
-            verificationToken != null ? verificationToken : "");
   }
 
 }

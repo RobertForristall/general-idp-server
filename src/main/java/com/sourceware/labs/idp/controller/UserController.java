@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +34,10 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 import com.nimbusds.jose.JOSEException;
 import com.sourceware.labs.idp.entity.AccountVerification;
+import com.sourceware.labs.idp.entity.RecoveryCode.RecoveryType;
+import com.sourceware.labs.idp.entity.RecoveryEmail;
+import com.sourceware.labs.idp.entity.RecoveryPhone;
+import com.sourceware.labs.idp.entity.RecoveryVerification;
 import com.sourceware.labs.idp.entity.Role.Application;
 import com.sourceware.labs.idp.entity.Role.RoleName;
 import com.sourceware.labs.idp.entity.SecurityQuestion;
@@ -86,10 +91,9 @@ import jakarta.validation.ConstraintViolationException;
  */
 @RestController
 @RequestMapping(path = "/user")
-public class UserController {
+public class UserController extends BaseController{
 
   private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
-  private static final String BASE_PATH = "/user";
   private static final String SIGNUP_PATH = "/signup";
   private static final String VERIFY_PATH = "/verify/{userId}/{verificationToken}";
   private static final String LOGIN_PATH = "/login";
@@ -116,6 +120,7 @@ public class UserController {
     this.accountVerificationRepo = accountVerificationRepo;
     this.awsEmailService = awsEmailService;
     this.authService = authService;
+    this.BASE_PATH = "/user";
   }
 
   @ApiResponses({
@@ -207,6 +212,33 @@ public class UserController {
     if (verifications.size() == 1) {
       User user = userRepo.getReferenceById(userId);
       user.setVerified(true);
+      if (user.getRecoveryEmail() != null) {
+        RecoveryVerification newRecoveryVerification = new RecoveryVerification();
+        newRecoveryVerification.setRecoveryType(RecoveryType.EMAIL);
+        newRecoveryVerification.setVerificationToken(RandomStringUtils.secureStrong().nextAlphanumeric(50));
+        newRecoveryVerification.setUser(user);
+        Set<RecoveryVerification> recoveryVerifications = user.getRecoveryVerifications();
+        recoveryVerifications.add(newRecoveryVerification);
+        user.setRecoveryVerifications(recoveryVerifications);
+        awsEmailService.sendMessage(
+                awsEmailService.createSimpleMailMessage(
+                        user.getRecoveryEmail().getEmail(),
+                        "Sourceware Labs IDP Recovery Email Verification",
+                        awsEmailService.createRecoveryVerificatioEmailBody(
+                                user.getId(),
+                                newRecoveryVerification.getVerificationToken(),
+                                RecoveryType.EMAIL)));
+      }
+      if (user.getRecoveryPhone() != null) {
+        RecoveryVerification newRecoveryVerification = new RecoveryVerification();
+        newRecoveryVerification.setRecoveryType(RecoveryType.PHONE);
+        newRecoveryVerification.setVerificationToken(RandomStringUtils.secureStrong().nextAlphanumeric(50));
+        newRecoveryVerification.setUser(user);
+        Set<RecoveryVerification> recoveryVerifications = user.getRecoveryVerifications();
+        recoveryVerifications.add(newRecoveryVerification);
+        user.setRecoveryVerifications(recoveryVerifications);
+        // TODO send phone SMS with verification token
+      }
       user = userRepo.save(user);
       response.setStatus(HttpStatus.OK.value());
       return "User successfully verified";
@@ -291,16 +323,26 @@ public class UserController {
             signupData.getDob(),
             ts,
             ts);
-    SecurityQuestion sq = new SecurityQuestion(
-            null,
-            signupData.getSq1(),
-            signupData.getSq2(),
-            signupData.getSa1(),
-            signupData.getSa2(),
-            ts,
-            ts,
-            null);
-    user.setSecurityQuestion(sq);
+    if (signupData.areSecurityQuestionsPresent()) {
+      SecurityQuestion sq = new SecurityQuestion(
+              null,
+              signupData.getSq1(),
+              signupData.getSq2(),
+              signupData.getSa1(),
+              signupData.getSa2(),
+              ts,
+              ts,
+              null);
+      user.setSecurityQuestion(sq);
+    }
+    if (signupData.getRecoveryEmail() != null) {
+      RecoveryEmail recoveryEmail = new RecoveryEmail(null, signupData.getRecoveryEmail(), false, ts, ts);
+      user.setRecoveryEmail(recoveryEmail);
+    }
+    if (signupData.getRecoveryPhone() != null) {
+      RecoveryPhone recoveryPhone = new RecoveryPhone(null, signupData.getRecoveryPhone(), false, ts, ts);
+      user.setRecoveryPhone(recoveryPhone);
+    }
     user.setRoles(
             Set.of(
                     roleRepo.findRoleByApplicationAndRole(Application.RealQuick, RoleName.User)
@@ -308,10 +350,6 @@ public class UserController {
     user.setAccountVerification(
             new AccountVerification(null, signupData.getVerificationToken(), user));
     return user;
-  }
-
-  private String getRoutePath(String path) {
-    return BASE_PATH + "/" + path.split("/")[1];
   }
 
 }

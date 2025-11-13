@@ -10,6 +10,7 @@ import com.sourceware.labs.idp.entity.Role.Application;
 import com.sourceware.labs.idp.entity.Role.RoleName;
 import com.sourceware.labs.idp.entity.SecurityQuestion;
 import com.sourceware.labs.idp.util.LoginData;
+import com.sourceware.labs.idp.util.RecoveryDataAnswers;
 import com.sourceware.labs.idp.util.SignupData;
 
 public class TestData {
@@ -58,11 +59,22 @@ public class TestData {
     return user;
   }
   
+  public static SignupData getTestSignupDataWithRecoveryResources() {
+    SignupData data = getTestSignupData();
+    data.setRecoveryEmail("recovery@test.com");
+    data.setRecoveryPhone("+1 111 111-1111");
+    return data;
+  }
+  
   public static LoginData getLoginData() {
     LoginData login = new LoginData();
     login.setEmail(email);
     login.setPassword(password);
     return login;
+  }
+  
+  public static RecoveryDataAnswers getRecoveryDataAnswers() {
+    return new RecoveryDataAnswers(getTestSignupData().getEmail(), getTestSignupData().getSa1(), getTestSignupData().getSa2());
   }
 
 }

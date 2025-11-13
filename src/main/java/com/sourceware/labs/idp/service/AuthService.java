@@ -22,6 +22,7 @@ import com.sourceware.labs.idp.entity.Role;
 import com.sourceware.labs.idp.entity.User;
 import com.sourceware.labs.idp.jwt.JwtManager;
 import com.sourceware.labs.idp.keystore.IdpKeyStoreData;
+import com.sourceware.labs.idp.util.RecoveryCookie;
 import com.sourceware.labs.idp.util.SessionCookie;
 
 @Service
@@ -102,6 +103,20 @@ public class AuthService {
             accessToken,
             refreshToken);
   }
+  
+  public RecoveryCookie generateRecoveryCookie(User user) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, UnrecoverableEntryException, OperatorCreationException, IOException, JOSEException {
+    return new RecoveryCookie(
+            user.getId(),
+            JwtManager
+            .getSignedJwtToken(
+                    JWSAlgorithm.ES256,
+                    clientId,
+                    clientId,
+                    60 * 1,
+                    idpKeyStoreData,
+                    user.getId())
+            .serialize());
+  }
 
   public boolean verifyAccessToken(
           SessionCookie cookie) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, UnrecoverableEntryException, OperatorCreationException, IOException, JOSEException, ParseException {
@@ -149,5 +164,7 @@ public class AuthService {
       return Optional.empty();
     }
   }
+  
+  
 
 }

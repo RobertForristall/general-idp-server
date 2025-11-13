@@ -59,7 +59,7 @@ public class AccountVerificationTests extends BaseIdpApplicationTests {
   public void successfullyVerifyUser() {
     ResponseEntity<String> result = this.restTemplate.getForEntity(
             fullTestingRoute
-                    + getPathVariables(String.valueOf(userId.intValue()), verificationToken),
+                    + getVerificationPathVariables(String.valueOf(userId.intValue()), verificationToken),
             String.class);
     Assertions.assertEquals(HttpStatusCode.valueOf(200), result.getStatusCode());
     Assertions.assertEquals("User successfully verified", result.getBody());
@@ -68,7 +68,7 @@ public class AccountVerificationTests extends BaseIdpApplicationTests {
   @Test
   public void catchUserIdNull() {
     ResponseEntity<String> result = this.restTemplate.getForEntity(
-            fullTestingRoute + getPathVariables(null, verificationToken),
+            fullTestingRoute + getVerificationPathVariables(null, verificationToken),
             String.class);
     Assertions.assertEquals(HttpStatusCode.valueOf(404), result.getStatusCode());
   }
@@ -76,7 +76,7 @@ public class AccountVerificationTests extends BaseIdpApplicationTests {
   @Test
   public void catchVerificationTokenNull() {
     ResponseEntity<String> result = this.restTemplate.getForEntity(
-            fullTestingRoute + getPathVariables(String.valueOf(userId.intValue()), null),
+            fullTestingRoute + getVerificationPathVariables(String.valueOf(userId.intValue()), null),
             String.class);
     Assertions.assertEquals(HttpStatusCode.valueOf(404), result.getStatusCode());
   }
@@ -112,7 +112,7 @@ public class AccountVerificationTests extends BaseIdpApplicationTests {
   @Test
   public void catchNoAccountVerificationEntryFound() {
     ResponseEntity<String> result = this.restTemplate.getForEntity(
-            fullTestingRoute + getPathVariables(String.valueOf(999), verificationToken),
+            fullTestingRoute + getVerificationPathVariables(String.valueOf(999), verificationToken),
             String.class);
     assertRestErrorsEqual(
             result,
@@ -122,10 +122,5 @@ public class AccountVerificationTests extends BaseIdpApplicationTests {
             3,
             "Error: no entry in account validation table found");
   }
-
-  private String getPathVariables(String userId, String verificationToken) {
-    return "/%s/%s".formatted(
-            userId != null ? userId : "",
-            verificationToken != null ? verificationToken : "");
-  }
+  
 }

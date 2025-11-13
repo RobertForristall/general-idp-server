@@ -13,4 +13,6 @@ import com.sourceware.labs.idp.entity.User;
  */
 public interface UserRepo extends JpaRepository<User, Long> {
   List<User> findUserByEmailAndPassword(String email, String password);
+  
+  List<User> findUserByEmail(String email);
 }
