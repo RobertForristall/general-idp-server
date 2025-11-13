@@ -38,6 +38,7 @@ import com.forristall.general.idp.repo.RecoveryVerificationRepo;
 import com.forristall.general.idp.repo.SecurityQuestionRepo;
 import com.forristall.general.idp.repo.UserRepo;
 import com.forristall.general.idp.service.AuthService;
+import com.forristall.general.idp.service.AwsEmailService;
 import com.forristall.general.idp.util.GetSecurityQuestions;
 import com.forristall.general.idp.util.RecoveryCookie;
 import com.forristall.general.idp.util.RecoveryDataAnswers;
@@ -66,17 +67,21 @@ public class RecoveryController extends BaseController {
   private final RecoveryVerificationRepo recoveryVerificationRepo;
 
   private final AuthService authService;
+  
+  private final AwsEmailService awsEmailService;
 
   @Autowired
   RecoveryController(
           UserRepo userRepo,
           SecurityQuestionRepo securityQuestionRepo,
           RecoveryVerificationRepo recoveryVerificationRepo,
-          AuthService authService) {
+          AuthService authService,
+          AwsEmailService awsEmailService) {
     this.userRepo = userRepo;
     this.securityQuestionRepo = securityQuestionRepo;
     this.recoveryVerificationRepo = recoveryVerificationRepo;
     this.authService = authService;
+    this.awsEmailService = awsEmailService;
     this.BASE_PATH = "/recovery";
   }
   
