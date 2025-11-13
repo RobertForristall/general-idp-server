@@ -33,10 +33,12 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 import com.forristall.general.idp.entity.RecoveryCode;
 import com.forristall.general.idp.entity.RecoveryCode.RecoveryType;
+import com.forristall.general.idp.entity.RecoveryEmail;
 import com.forristall.general.idp.entity.RecoveryVerification;
 import com.forristall.general.idp.entity.SecurityQuestion;
 import com.forristall.general.idp.entity.User;
 import com.forristall.general.idp.repo.RecoveryCodeRepo;
+import com.forristall.general.idp.repo.RecoveryEmailRepo;
 import com.forristall.general.idp.repo.RecoveryVerificationRepo;
 import com.forristall.general.idp.repo.SecurityQuestionRepo;
 import com.forristall.general.idp.repo.UserRepo;
@@ -70,6 +72,8 @@ public class RecoveryController extends BaseController {
   private final RecoveryVerificationRepo recoveryVerificationRepo;
   
   private final RecoveryCodeRepo recoveryCodeRepo;
+  
+  private final RecoveryEmailRepo recoveryEmailRepo;
 
   private final AuthService authService;
   
@@ -81,12 +85,14 @@ public class RecoveryController extends BaseController {
           SecurityQuestionRepo securityQuestionRepo,
           RecoveryVerificationRepo recoveryVerificationRepo,
           RecoveryCodeRepo recoveryCodeRepo,
+          RecoveryEmailRepo recoveryEmailRepo,
           AuthService authService,
           AwsEmailService awsEmailService) {
     this.userRepo = userRepo;
     this.securityQuestionRepo = securityQuestionRepo;
     this.recoveryVerificationRepo = recoveryVerificationRepo;
     this.recoveryCodeRepo = recoveryCodeRepo;
+    this.recoveryEmailRepo = recoveryEmailRepo;
     this.authService = authService;
     this.awsEmailService = awsEmailService;
     this.BASE_PATH = "/recovery";
@@ -288,6 +294,18 @@ public class RecoveryController extends BaseController {
     }
     LOGGER.error(ex.getLocalizedMessage());
     return ex.getLocalizedMessage();
+  }
+  
+  private void sendRecoveryCodeEmail(User user, String email) {
+    RecoveryCode recoveryCode = createRecoveryCode(RecoveryType.EMAIL, user);
+    recoveryCodeRepo.save(recoveryCode);
+    awsEmailService.sendMessage(
+            awsEmailService.createSimpleMailMessage(
+                    email,
+                    "Forristall General IDP User Recovery",
+                    awsEmailService.createRecoveryTokenEmailBody(
+                            user.getId(),
+                            recoveryCode.getCode())));
   }
   
   private RecoveryCode createRecoveryCode(RecoveryType recoveryType, User user) {
