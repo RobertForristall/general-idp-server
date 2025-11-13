@@ -237,6 +237,10 @@ public class RecoveryController extends BaseController {
     return null;
   }
   
+  //TODO handle sending recovery token email
+  
+  //TODO handle verifying recovery token email and return a recovery token
+  
   @ResponseStatus(value = HttpStatus.BAD_REQUEST)
   @ExceptionHandler(MethodArgumentTypeMismatchException.class)
   public String handleError(HttpServletRequest req, MethodArgumentTypeMismatchException ex) {
