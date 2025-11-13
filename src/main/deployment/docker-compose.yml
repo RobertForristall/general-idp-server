@@ -1,7 +1,7 @@
 services:
   idp-server:
-    image: sourceware-labs/sourceware-lab-idp:latest
-    container_name: sourceware-lab-idp
+    image: forristall-general/forristall-general-idp:latest
+    container_name: forristall-general-idp
     ports:
       - "8080:8080"
     environment:

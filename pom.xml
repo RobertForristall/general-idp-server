@@ -9,11 +9,11 @@
 		<version>3.4.0</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.sourceware.labs</groupId>
+	<groupId>com.forristall.general</groupId>
 	<artifactId>idp</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>idp</name>
-	<description>IDP server hosted by Sourceware Labs</description>
+	<description>IDP server with internal services and connectivity to third party services</description>
 	<url />
 	<licenses>
 		<license />
@@ -29,7 +29,7 @@
 	</scm>
 	<properties>
 		<java.version>21</java.version>
-		<basename>sourceware-labs-${project.version}</basename>
+		<basename>forristall-general-${project.version}</basename>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -248,8 +248,8 @@
 						<!-- version 1.1.0+ skips 'pom' builds, use 1.0.0 -->
 						<configuration>
 							<serverId>docker</serverId>
-							<registryUrl>https://sourceware-labs/</registryUrl>
-							<imageName>sourceware-labs/sourceware-lab-idp</imageName>
+							<registryUrl>https://forristall-general/</registryUrl>
+							<imageName>forristall-general/forristall-general-idp</imageName>
 						</configuration>
 						<executions>
 							<execution>

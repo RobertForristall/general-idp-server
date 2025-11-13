@@ -25,4 +25,4 @@ RUN addgroup -S idp && adduser -S idp -G idp && chown -R idp:idp ${HOME}
 
 USER idp:idp
 
-CMD [ "java", "-cp", "lib/*:.", "com.sourceware.labs.idp.IdpApplication" ]
+CMD [ "java", "-cp", "lib/*:.", "com.forristall.general.idp.IdpApplication" ]
