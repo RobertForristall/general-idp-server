@@ -256,6 +256,59 @@ public class RecoveryController extends BaseController {
   }
   
   //TODO handle sending recovery token email
+  @GetMapping(RECOVERY_PATH_EMAIL)
+  String sendRecoveryEmail(
+          @PathVariable(name="email", required = true) String email,
+          HttpServletResponse response) throws IOException {
+    List<User> users = userRepo.findUserByEmail(email);
+    if (users.size() == 1) {
+      User user = users.getFirst();
+      if (user.isVerified()) {
+        sendRecoveryCodeEmail(user, email);
+        response.setStatus(HttpStatus.OK.value());
+        return "If an account was associated with the provided email then a recovery email has been sent...";
+      } else {
+        response.sendError(
+                HttpStatus.UNAUTHORIZED.value(),
+                new RestErrorBuilder().setRoute(getRoutePath(RECOVERY_PATH_EMAIL))
+                        .setMethod(RequestMethod.GET)
+                        .setErrorCode(5)
+                        .setMsg("Error: User is not verified")
+                        .build()
+                        .toString());
+      }
+    } else {
+      List<RecoveryEmail> recoveryEmails = recoveryEmailRepo.findRecoveryEmailByEmail(email);
+      if (recoveryEmails.size() == 1) {
+        RecoveryEmail recoveryEmail = recoveryEmails.getFirst();
+        User user = userRepo.findUserByRecoveryEmail(recoveryEmail);
+        if (user.isVerified() && recoveryEmail.isVerified()) {
+          sendRecoveryCodeEmail(user, email);
+          response.setStatus(HttpStatus.OK.value());
+          return "If an account was associated with the provided email then a recovery email has been sent...";
+        } else {
+          response.sendError(
+                  HttpStatus.UNAUTHORIZED.value(),
+                  new RestErrorBuilder().setRoute(getRoutePath(RECOVERY_PATH_EMAIL))
+                          .setMethod(RequestMethod.GET)
+                          .setErrorCode(user.isVerified() ? 8 : 5)
+                          .setMsg("Error: "+(user.isVerified() ? "Recovery email" : "User")+" is not verified")
+                          .build()
+                          .toString());
+        }
+      } else {
+        response.sendError(
+                HttpStatus.NOT_FOUND.value(),
+                new RestErrorBuilder().setRoute(getRoutePath(RECOVERY_PATH_EMAIL))
+                        .setMethod(RequestMethod.GET)
+                        .setErrorCode(4)
+                        .setMsg("Error: No user found using provided email")
+                        .build()
+                        .toString());
+      }
+    }
+    return null;
+  }
   
   //TODO handle verifying recovery token email and return a recovery token
   
