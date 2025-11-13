@@ -11,6 +11,7 @@ import java.security.cert.CertificateException;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.slf4j.Logger;
@@ -30,6 +31,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import com.forristall.general.idp.entity.RecoveryCode;
 import com.forristall.general.idp.entity.RecoveryCode.RecoveryType;
 import com.forristall.general.idp.entity.RecoveryVerification;
 import com.forristall.general.idp.entity.SecurityQuestion;
@@ -286,5 +288,13 @@ public class RecoveryController extends BaseController {
     }
     LOGGER.error(ex.getLocalizedMessage());
     return ex.getLocalizedMessage();
+  }
+  
+  private RecoveryCode createRecoveryCode(RecoveryType recoveryType, User user) {
+    RecoveryCode recoveryCode = new RecoveryCode();
+    recoveryCode.setRecoveryType(recoveryType);
+    recoveryCode.setCode(RandomStringUtils.secureStrong().nextAlphanumeric(50));
+    recoveryCode.setUser(user);
+    return recoveryCode;
   }
 }
