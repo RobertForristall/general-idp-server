@@ -73,5 +73,14 @@ public class AwsEmailService {
                     + userId + "&verificationToken=" + verificationToken + "&recoveryType=" + recoveryType.name() +"</p>\n");
     return b.toString();
   }
+  
+  public String createRecoveryTokenEmailBody(Long userId, String recoveryToken) {
+    StringBuilder b = new StringBuilder();
+    b.append("<h1>Forristall General IDP</h1>\n");
+    b.append(
+            "<p>Click the following link to recover your account: http://localhost:8080/recovery/email/verify?userId="
+                    + userId + "&recoveryToken=" + recoveryToken + "</p>\n");
+    return b.toString();
+  }
 
 }
