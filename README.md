@@ -1,6 +1,6 @@
-# sourceware-lab-idp
+# forristall-general-idp
 
-Sourceware Lab IDP server implementing OAuth 2.0 architecture
+Forristall General IDP server implementing OAuth 2.0 architecture
 
 ## ENV Variables
 
@@ -38,7 +38,7 @@ Create a run configuration for the `IdpApplication.java` file that includes the 
 Run the `build-project.sh` from the `src/main/scripts` directory to build the IDP server's base image and the IDP server's deployment image.
 
 **Will be method once new IDP base image is hosted**
-~~Run the `mvn clean package` command at the root of the folder to build the Java project and create a Docker image under the tag: `sourceware-labs/sourceware-lab-idp:latest`.~~
+~~Run the `mvn clean package` command at the root of the folder to build the Java project and create a Docker image under the tag: `forristall-general/forristall-general-idp:latest`.~~
 
 Afterwared, create a `.env` file in the `/src/main/deployment` folder with the previously mentioned ENV variables.
 
