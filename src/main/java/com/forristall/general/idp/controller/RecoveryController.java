@@ -30,10 +30,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import com.forristall.general.idp.entity.RecoveryCode.RecoveryType;
 import com.forristall.general.idp.entity.RecoveryVerification;
 import com.forristall.general.idp.entity.SecurityQuestion;
 import com.forristall.general.idp.entity.User;
-import com.forristall.general.idp.entity.RecoveryCode.RecoveryType;
+import com.forristall.general.idp.repo.RecoveryCodeRepo;
 import com.forristall.general.idp.repo.RecoveryVerificationRepo;
 import com.forristall.general.idp.repo.SecurityQuestionRepo;
 import com.forristall.general.idp.repo.UserRepo;
@@ -65,6 +66,8 @@ public class RecoveryController extends BaseController {
   private final SecurityQuestionRepo securityQuestionRepo;
   
   private final RecoveryVerificationRepo recoveryVerificationRepo;
+  
+  private final RecoveryCodeRepo recoveryCodeRepo;
 
   private final AuthService authService;
   
@@ -75,11 +78,13 @@ public class RecoveryController extends BaseController {
           UserRepo userRepo,
           SecurityQuestionRepo securityQuestionRepo,
           RecoveryVerificationRepo recoveryVerificationRepo,
+          RecoveryCodeRepo recoveryCodeRepo,
           AuthService authService,
           AwsEmailService awsEmailService) {
     this.userRepo = userRepo;
     this.securityQuestionRepo = securityQuestionRepo;
     this.recoveryVerificationRepo = recoveryVerificationRepo;
+    this.recoveryCodeRepo = recoveryCodeRepo;
     this.authService = authService;
     this.awsEmailService = awsEmailService;
     this.BASE_PATH = "/recovery";
