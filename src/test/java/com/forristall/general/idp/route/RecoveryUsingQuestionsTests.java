@@ -39,6 +39,8 @@ import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jwt.JWTClaimsSet;
 
+//TODO Determine error caused when this class runs before EmailRecoveryTokenTests
+
 @TestInstance(Lifecycle.PER_CLASS)
 @TestMethodOrder(OrderAnnotation.class)
 public class RecoveryUsingQuestionsTests extends BaseIdpApplicationTests{
