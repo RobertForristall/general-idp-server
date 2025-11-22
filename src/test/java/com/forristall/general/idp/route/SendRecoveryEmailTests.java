@@ -38,7 +38,6 @@ public class SendRecoveryEmailTests extends BaseIdpApplicationTests {
   private URI fullTestingRoute;
 
   private String emailVerificationToken;
-  private String phoneVerificationToken;
   private Long userId;
   private String email;
   private String recoveryEmail;
@@ -69,9 +68,6 @@ public class SendRecoveryEmailTests extends BaseIdpApplicationTests {
       if (recoveryVerification.getUser().getId().equals(userId)) {
         if (recoveryVerification.getRecoveryType().equalsName("email")) {
           emailVerificationToken = recoveryVerification.getVerificationToken();
-        }
-        if (recoveryVerification.getRecoveryType().equalsName("phone")) {
-          phoneVerificationToken = recoveryVerification.getVerificationToken();
         }
       }
     }
