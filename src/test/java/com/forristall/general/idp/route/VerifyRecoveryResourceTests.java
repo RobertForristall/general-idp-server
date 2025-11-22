@@ -152,7 +152,7 @@ public class VerifyRecoveryResourceTests extends BaseIdpApplicationTests {
             String.class);
     assertRestErrorsEqual(
             result,
-            testingPath,
+            testingPath+"/{userId}/{recoveryType}/{verificationToken}",
             testingMethod,
             400,
             1,
@@ -169,7 +169,7 @@ public class VerifyRecoveryResourceTests extends BaseIdpApplicationTests {
             String.class);
     assertRestErrorsEqual(
             result,
-            testingPath,
+            testingPath+"/{userId}/{recoveryType}/{verificationToken}",
             testingMethod,
             400,
             4,
