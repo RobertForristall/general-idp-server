@@ -376,17 +376,13 @@ public class RecoveryController extends BaseController {
   @ResponseStatus(value = HttpStatus.BAD_REQUEST)
   @ExceptionHandler(MissingServletRequestParameterException.class)
   public String handleError(HttpServletRequest req, MissingServletRequestParameterException ex) {
-    if (req.getRequestURI().contains("questions")) {
-      RestError restError = new RestErrorBuilder().setRoute(getRoutePath(RECOVERY_PATH_SQ))
-              .setMethod(RequestMethod.GET)
-              .setErrorCode(1)
-              .setMsg("Error: The 'email' request parameter must be defined")
-              .build();
-      LOGGER.error(restError.toString());
-      return restError.toString();
-    }
-    LOGGER.error(ex.getLocalizedMessage());
-    return ex.getLocalizedMessage();
+    RestError restError = new RestErrorBuilder().setRoute(req.getServletPath())
+            .setMethod(RequestMethod.GET)
+            .setErrorCode(1)
+            .setMsg("Error: The 'email' request parameter must be defined")
+            .build();
+    LOGGER.error(restError.toString());
+    return restError.toString();
   }
   
   private void sendRecoveryCodeEmail(User user, String email) {
