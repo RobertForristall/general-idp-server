@@ -111,10 +111,13 @@ public class RecoveryController extends BaseController {
                     verificationToken);
     if (verifications.size() == 1) {
       User user = userRepo.getReferenceById(userId);
-      if (recoveryType.equals(RecoveryType.EMAIL.name())) {
+      if (RecoveryType.EMAIL.equalsName(recoveryType)) {
         user.getRecoveryEmail().setVerified(true);
-      } else {
+//        recoveryEmailRepo.save(user.getRecoveryEmail());
+      } else if (RecoveryType.PHONE.equalsName(recoveryType)) {
         user.getRecoveryPhone().setVerified(true);
+      } else {
+        //TODO Handle invalid recovery type
       }
       user = userRepo.save(user);
       response.setStatus(HttpStatus.OK.value());
