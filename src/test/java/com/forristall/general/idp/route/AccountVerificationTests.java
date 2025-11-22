@@ -102,7 +102,7 @@ public class AccountVerificationTests extends BaseIdpApplicationTests {
             String.class);
     assertRestErrorsEqual(
             result,
-            testingPath,
+            testingPath+"/{userId}/{verificationToken}",
             testingMethod,
             400,
             1,
@@ -116,7 +116,7 @@ public class AccountVerificationTests extends BaseIdpApplicationTests {
             String.class);
     assertRestErrorsEqual(
             result,
-            testingPath,
+            testingPath+"/{userId}/{verificationToken}",
             testingMethod,
             400,
             3,
