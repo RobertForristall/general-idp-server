@@ -18,6 +18,7 @@ public class TestData {
   private static Timestamp ts = new Timestamp(new Date().getTime());
   
   private static String email = "test@test.com";
+  private static String recoveryEmail = "recovery@test.com";
   private static String password = "testPass";
 
   public static SecurityQuestion getTestSecurityQuestion() {
@@ -56,6 +57,7 @@ public class TestData {
     user.setSq2(sq.getQuestion2());
     user.setSa1(sq.getAnswer1());
     user.setSa2(sq.getAnswer2());
+    user.setRecoveryEmail(recoveryEmail);
     return user;
   }
   
