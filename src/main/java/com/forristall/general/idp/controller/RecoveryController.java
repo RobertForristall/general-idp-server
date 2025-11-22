@@ -317,8 +317,8 @@ public class RecoveryController extends BaseController {
   //TODO handle verifying recovery token email and return a recovery token
   @GetMapping(RECOVERY_PATH_EMAIL_VERIFY)
   String verifyEmailRecoveryToken(
-          @PathVariable(name = "userId", required = true) Long userId,
-          @PathVariable(name = "recoveryToken", required = true) String code,
+          @RequestParam(name = "userId", required = true) Long userId,
+          @RequestParam(name = "recoveryToken", required = true) String code,
           HttpServletResponse response) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, UnrecoverableEntryException, OperatorCreationException, IOException, JOSEException {
     List<RecoveryCode> recoveryCodes = recoveryCodeRepo.findRecoveryCodeByCode(code);
     if (recoveryCodes.size() == 1) {
