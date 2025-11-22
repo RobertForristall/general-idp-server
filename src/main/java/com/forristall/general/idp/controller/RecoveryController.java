@@ -355,7 +355,7 @@ public class RecoveryController extends BaseController {
   @ResponseStatus(value = HttpStatus.BAD_REQUEST)
   @ExceptionHandler(MethodArgumentTypeMismatchException.class)
   public String handleError(HttpServletRequest req, MethodArgumentTypeMismatchException ex) {
-    if (req.getRequestURI().contains("verify")) {
+    if (req.getServletPath().equals("/recovery" + RECOVERY_PATH_VERIFY_RESOURCE)) {
       RestErrorBuilder builder = new RestErrorBuilder().setRoute(getRoutePath(RECOVERY_PATH_VERIFY_RESOURCE))
               .setMethod(RequestMethod.GET);
       if (ex.getLocalizedMessage().contains("userId")) {
