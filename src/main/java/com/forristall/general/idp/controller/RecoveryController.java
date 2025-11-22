@@ -258,8 +258,9 @@ public class RecoveryController extends BaseController {
   //TODO handle sending recovery token email
   @GetMapping(RECOVERY_PATH_EMAIL)
   String sendRecoveryEmail(
-          @PathVariable(name="email", required = true) String email,
+          @RequestParam(name="email", required = true) String email,
           HttpServletResponse response) throws IOException {
+    email = URLDecoder.decode(email, StandardCharsets.UTF_8);
     List<User> users = userRepo.findUserByEmail(email);
     if (users.size() == 1) {
       User user = users.getFirst();
