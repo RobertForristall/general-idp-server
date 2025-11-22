@@ -369,6 +369,15 @@ public class RecoveryController extends BaseController {
       LOGGER.error(restError.toString());
       return restError.toString();
     }
+    if (req.getServletPath().equals("/recovery" + RECOVERY_PATH_EMAIL_VERIFY)) {
+      RestErrorBuilder builder = new RestErrorBuilder().setRoute(getRoutePath(RECOVERY_PATH_EMAIL_VERIFY)).setMethod(RequestMethod.GET);
+      if (ex.getLocalizedMessage().contains("userId")) {
+        builder.setErrorCode(1).setMsg("Error: user ID is not of type Integer");
+      }
+      RestError restError = builder.build();
+      LOGGER.error(restError.toString());
+      return restError.toString();
+    }
     LOGGER.error(ex.getLocalizedMessage());
     return ex.getLocalizedMessage();
   }
@@ -379,7 +388,7 @@ public class RecoveryController extends BaseController {
     RestError restError = new RestErrorBuilder().setRoute(req.getServletPath())
             .setMethod(RequestMethod.GET)
             .setErrorCode(1)
-            .setMsg("Error: The 'email' request parameter must be defined")
+            .setMsg("Error: The '"+ex.getParameterName()+"' request parameter must be defined")
             .build();
     LOGGER.error(restError.toString());
     return restError.toString();
