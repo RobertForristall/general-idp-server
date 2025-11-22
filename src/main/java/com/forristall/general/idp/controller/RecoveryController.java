@@ -387,7 +387,8 @@ public class RecoveryController extends BaseController {
   
   private void sendRecoveryCodeEmail(User user, String email) {
     RecoveryCode recoveryCode = createRecoveryCode(RecoveryType.EMAIL, user);
-    recoveryCodeRepo.save(recoveryCode);
+    user.setRecoveryCode(recoveryCode);
+    userRepo.save(user);
     awsEmailService.sendMessage(
             awsEmailService.createSimpleMailMessage(
                     email,
