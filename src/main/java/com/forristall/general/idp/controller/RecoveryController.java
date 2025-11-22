@@ -311,6 +311,42 @@ public class RecoveryController extends BaseController {
   }
   
   //TODO handle verifying recovery token email and return a recovery token
+  @GetMapping(RECOVERY_PATH_EMAIL_VERIFY)
+  String verifyEmailRecoveryToken(
+          @PathVariable(name = "userId", required = true) Long userId,
+          @PathVariable(name = "recoveryToken", required = true) String code,
+          HttpServletResponse response) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, UnrecoverableEntryException, OperatorCreationException, IOException, JOSEException {
+    List<RecoveryCode> recoveryCodes = recoveryCodeRepo.findRecoveryCodeByCode(code);
+    if (recoveryCodes.size() == 1) {
+      RecoveryCode recoveryCode = recoveryCodes.get(0);
+      if (recoveryCode.getUser().getId() == userId) {
+        RecoveryCookie recoveryCookie = authService.generateRecoveryCookie(recoveryCode.getUser());
+        response.addCookie(new Cookie("ForristallGeneralIdpRecovery", URLEncoder.encode(recoveryCookie.toString(), StandardCharsets.UTF_8)));
+        response.setStatus(HttpStatus.OK.value());
+        return "Recovery Token Obtained";
+      } else {
+        //TODO determine better response message since this information should not be available to potential attackers 
+        response.sendError(
+                HttpStatus.BAD_REQUEST.value(),
+                new RestErrorBuilder().setRoute(getRoutePath(RECOVERY_PATH_EMAIL_VERIFY))
+                        .setMethod(RequestMethod.GET)
+                        .setErrorCode(9)
+                        .setMsg("Error: userId does not match user tied to provided recovery code")
+                        .build()
+                        .toString());
+      }
+    } else {
+      response.sendError(
+              HttpStatus.NOT_FOUND.value(),
+              new RestErrorBuilder().setRoute(getRoutePath(RECOVERY_PATH_EMAIL_VERIFY))
+                      .setMethod(RequestMethod.GET)
+                      .setErrorCode(10)
+                      .setMsg("Error: No recovery code found using provided code")
+                      .build()
+                      .toString());
+    }
+    return null;
+  }
   
   @ResponseStatus(value = HttpStatus.BAD_REQUEST)
   @ExceptionHandler(MethodArgumentTypeMismatchException.class)
