@@ -355,7 +355,8 @@ public class RecoveryController extends BaseController {
   @ResponseStatus(value = HttpStatus.BAD_REQUEST)
   @ExceptionHandler(MethodArgumentTypeMismatchException.class)
   public String handleError(HttpServletRequest req, MethodArgumentTypeMismatchException ex) {
-    if (req.getServletPath().equals("/recovery" + RECOVERY_PATH_VERIFY_RESOURCE)) {
+    String path = req.getServletPath();
+    if (path.startsWith("/recovery/verify")) {
       RestErrorBuilder builder = new RestErrorBuilder().setRoute(getRoutePath(RECOVERY_PATH_VERIFY_RESOURCE))
               .setMethod(RequestMethod.GET);
       if (ex.getLocalizedMessage().contains("userId")) {
@@ -369,7 +370,7 @@ public class RecoveryController extends BaseController {
       LOGGER.error(restError.toString());
       return restError.toString();
     }
-    if (req.getServletPath().equals("/recovery" + RECOVERY_PATH_EMAIL_VERIFY)) {
+    if (path.equals("/recovery" + RECOVERY_PATH_EMAIL_VERIFY)) {
       RestErrorBuilder builder = new RestErrorBuilder().setRoute(getRoutePath(RECOVERY_PATH_EMAIL_VERIFY)).setMethod(RequestMethod.GET);
       if (ex.getLocalizedMessage().contains("userId")) {
         builder.setErrorCode(1).setMsg("Error: user ID is not of type Integer");
