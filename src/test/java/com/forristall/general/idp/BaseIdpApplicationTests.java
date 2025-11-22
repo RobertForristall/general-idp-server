@@ -128,5 +128,9 @@ public abstract class BaseIdpApplicationTests {
             recoveryType != null ? recoveryType : "",
             token != null ? token : "");
   }
+  
+  protected String sendRecoveryEmailParams(String email) {
+    return "?email=" + URLEncoder.encode(email, StandardCharsets.UTF_8);
+  }
 
 }
