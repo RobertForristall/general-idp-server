@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import com.forristall.general.idp.repo.RecoveryCodeRepo;
 import com.forristall.general.idp.repo.RecoveryVerificationRepo;
 import com.forristall.general.idp.repo.UserRepo;
 import com.forristall.general.idp.service.AwsEmailService;
@@ -75,6 +76,9 @@ public abstract class BaseIdpApplicationTests {
   
   @Autowired
   protected RecoveryVerificationRepo recoveryVerificationRepo;
+
+  @Autowired
+  protected RecoveryCodeRepo recoveryCodeRepo;
 
   @MockitoBean
   protected AwsEmailService awsEmailService;
