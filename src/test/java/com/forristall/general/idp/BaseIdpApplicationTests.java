@@ -137,4 +137,9 @@ public abstract class BaseIdpApplicationTests {
     return "?email=" + URLEncoder.encode(email, StandardCharsets.UTF_8);
   }
 
+  protected String verifyRecoveryEmailTokenParams(String userId, String recoveryToken) {
+    return "?userId=" + URLEncoder.encode(userId, StandardCharsets.UTF_8) + "&recoveryToken="
+            + URLEncoder.encode(recoveryToken, StandardCharsets.UTF_8);
+  }
+
 }
